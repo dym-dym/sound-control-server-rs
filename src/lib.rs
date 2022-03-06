@@ -1,6 +1,6 @@
 pub struct Network {
-    ip: String,
-    port: String,
+    pub ip: String,
+    pub port: String,
 }
 
 impl Network {

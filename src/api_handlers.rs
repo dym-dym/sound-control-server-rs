@@ -2,10 +2,11 @@ use serde::{Serialize, Deserialize};
 use actix_web::{web, Responder, HttpResponse};
 use std::time::{UNIX_EPOCH, SystemTime};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AppVolumeInfo {
     volume: u8,
-
+    id: String,
+    muted: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -23,13 +24,25 @@ pub async fn upload() -> impl Responder {
     };
 
     HttpResponse::Ok().json(u)
-   //HttpResponse::Ok().body("went trough upload")
+}
+
+pub async fn update_volume(instr: web::Json<AppVolumeInfo>) -> HttpResponse {
+    println!("instruction : {:?}", instr);
+    println!("volume: {}", instr.volume);
+    println!("id: {}", instr.id);
+    println!("muted: {}", instr.muted);
+
+    HttpResponse::Ok().json(instr.0)
+}
+
+pub async fn request_infos() -> impl Responder {
+    let info = volume::get_app_info();
 }
 
 // When called tries to get the JSON content of the request and display it
-pub async fn download(info: web::Json<File>) -> HttpResponse {
+//pub async fn download(info: web::Json<File>) -> HttpResponse {
 
-    println!("{:?}", info); // Prints the JSON content to the console as it has been deserialized into a File struct
+    //println!("{:?}", info); // Prints the JSON content to the console as it has been deserialized into a File struct
 
-    HttpResponse::Ok().json(info.0) // Sends back a code 200 HttpResponse with the JSON as its content
-}
+    //HttpResponse::Ok().json(info.0) // Sends back a code 200 HttpResponse with the JSON as its content
+//}

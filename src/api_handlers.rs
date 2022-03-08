@@ -1,14 +1,12 @@
-use serde::{Serialize, Deserialize};
-use actix_web::{web, Responder, HttpResponse};
-use std::time::{UNIX_EPOCH, SystemTime};
+mod volume;
+//use serde::{Serialize, Deserialize};
+use actix_web::{web, HttpResponse};
+//use std::time::{UNIX_EPOCH, SystemTime};
+use volume::AppVolumeInfo;
+use pulsectl::controllers::types::ApplicationInfo;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AppVolumeInfo {
-    volume: u8,
-    id: String,
-    muted: bool,
-}
 
+/*
 #[derive(Debug, Serialize, Deserialize)]
 pub struct File {
     name: String,
@@ -16,7 +14,7 @@ pub struct File {
     err: String,
 }
 
-pub async fn upload() -> impl Responder {
+pub async fn _upload() -> impl Responder {
     let u = &File{
         name: "dummy data".to_string(),
         time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
@@ -25,6 +23,7 @@ pub async fn upload() -> impl Responder {
 
     HttpResponse::Ok().json(u)
 }
+*/
 
 pub async fn update_volume(instr: web::Json<AppVolumeInfo>) -> HttpResponse {
     println!("instruction : {:?}", instr);
@@ -32,17 +31,22 @@ pub async fn update_volume(instr: web::Json<AppVolumeInfo>) -> HttpResponse {
     println!("id: {}", instr.id);
     println!("muted: {}", instr.muted);
 
-    HttpResponse::Ok().json(instr.0)
+    match volume::update_app_volume(instr.volume, instr.id.clone(), instr.muted){
+        Err(x) if x == "App not found" => HttpResponse::InternalServerError().json(x),
+        Err(x) if x == "Wrong volume value" => HttpResponse::InternalServerError().json(x),
+        Ok(()) => HttpResponse::Ok().json("{}"),
+        _ => HttpResponse::BadRequest().json(""),
+    }
 }
 
-pub async fn request_infos() -> impl Responder {
-    let info = volume::get_app_info();
+pub async fn request_infos() -> HttpResponse {
+    let infos: Vec<ApplicationInfo> = volume::get_app_infos().unwrap();
+
+    let app_infos: Vec<AppVolumeInfo> = infos.iter().map(|x| {
+        AppVolumeInfo::new(x.volume.get()[0].0, x.name.clone().unwrap(), x.mute)
+    }).collect();
+
+    println!(" app_infos : {:?}", app_infos);
+
+    HttpResponse::Ok().json(app_infos)
 }
-
-// When called tries to get the JSON content of the request and display it
-//pub async fn download(info: web::Json<File>) -> HttpResponse {
-
-    //println!("{:?}", info); // Prints the JSON content to the console as it has been deserialized into a File struct
-
-    //HttpResponse::Ok().json(info.0) // Sends back a code 200 HttpResponse with the JSON as its content
-//}

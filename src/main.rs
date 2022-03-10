@@ -21,7 +21,6 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(
                 web::scope("/api")
-                    //.route("/volume_change/test", web::post().to(api_handlers::upload))
                     .route("/update_volume", web::post().to(api_handlers::update_volume))
                     .route("/request_infos", web::post().to(api_handlers::request_infos))
             )

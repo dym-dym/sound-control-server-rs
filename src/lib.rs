@@ -19,18 +19,3 @@ impl Network {
         })
     }
 }
-
-#[cfg(tests)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn network_parsing() {
-        assert_eq!(Network::new(vec!["server", "127.0.0.1", "9000"]), Network {"127.0.0.1", "9000"});
-    }
-
-    #[test]
-    fn network_error() {
-        assert_eq!(Network::new(vec!["server"]), Err(format!("Error: Usage: {} <IP> <PORT>"), "server"));
-    }
-}

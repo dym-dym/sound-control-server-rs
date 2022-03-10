@@ -1,16 +1,15 @@
 use pulsectl::controllers::{SinkController, AppControl, types::ApplicationInfo};
 use serde::{Serialize, Deserialize};
-use libpulse_binding::volume::Volume;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AppVolumeInfo {
-    pub volume: u32,
+    pub volume: f64,
     pub id: String,
     pub muted: bool,
 }
 
 impl AppVolumeInfo {
-    pub fn new(volume: u32, id: String, muted: bool) -> AppVolumeInfo {
+    pub fn new(volume: f64, id: String, muted: bool) -> AppVolumeInfo {
         AppVolumeInfo{
             volume,
             id,
@@ -18,8 +17,8 @@ impl AppVolumeInfo {
         }
     }
 
-    pub fn _update(mut self, volume: u32, muted: bool) -> Result<AppVolumeInfo, &'static str>{
-        if volume > 100 {
+    pub fn _update(mut self, volume: f64, muted: bool) -> Result<AppVolumeInfo, &'static str>{
+        if volume > 1.0 {
             return Err("Valeur de volume impossible");
         }
 
@@ -31,13 +30,10 @@ impl AppVolumeInfo {
 }
 
 
-pub fn update_app_volume(volume: u32, id: String, mute: bool) -> Result<(), &'static str>{
+pub fn update_app_volume(differential: f64, id: String, mute: bool) -> Result<&'static str, &'static str>{
 
-    let volume = Volume{
-        0 : volume,
-    };
 
-    if !volume.is_valid(){
+    if differential < -1.0 || differential > 1.00 {
         return Err("Wrong volume value");
     }
 
@@ -47,31 +43,46 @@ pub fn update_app_volume(volume: u32, id: String, mute: bool) -> Result<(), &'st
         .list_applications()
         .expect("Could not get list of current applications");
 
+    let mut device_index = 100000;
     let mut found = false;
 
     for app in apps {
-        if app.name.clone().unwrap() == id {
-            println!("{:?}", app.volume.get_mut());
+       if app.name.clone().unwrap() == id {
 
-            if mute {
-                app.volume.mute(2);
-                return Ok(());
-            }
-
-            app.volume.increase(volume);
-            //app.volume.set(2, volume);
-
-            println!("{:?}", app.volume.get_mut());
-
+           device_index = app.index;
             found = true;
         }
+    }
+
+    if handler.get_app_by_index(device_index).unwrap().mute {
+
+        if !mute {
+            match handler.set_app_mute(device_index, mute) {
+                Ok(_) => return Ok("App unmuted"),
+                Err(_) => return Err("Could not find app")
+            }
+        }
+    } else {
+        if mute {
+            match handler.set_app_mute(device_index, mute) {
+                Ok(_) => return Ok("App muted"),
+                Err(_) => return Err("Could not find app")
+            }
+        }
+    }
+
+    if differential > 0.0 {
+        handler.increase_app_volume_by_percent(device_index, differential);
+    }
+    else if differential < 0.0 {
+        handler.decrease_app_volume_by_percent(device_index, -differential)
     }
 
     if !found {
         return Err("App not found");
     }
 
-    Ok(())
+    Ok("Volume set")
 }
 
 pub fn get_app_infos() -> Result<Vec<ApplicationInfo>, &'static str> {

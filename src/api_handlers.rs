@@ -5,10 +5,6 @@ use pulsectl::controllers::types::ApplicationInfo;
 
 
 pub async fn update_volume(instr: web::Json<AppVolumeInfo>) -> HttpResponse {
-    println!("instruction : {:?}", instr);
-    println!("volume: {}", instr.volume);
-    println!("id: {}", instr.id);
-    println!("muted: {}", instr.muted);
 
     match volume::update_app_volume(instr.volume, instr.id.clone(), instr.muted){
         Err(x) => HttpResponse::InternalServerError().json(x),

@@ -16,17 +16,6 @@ impl AppVolumeInfo {
             muted,
         }
     }
-
-    pub fn _update(mut self, volume: f64, muted: bool) -> Result<AppVolumeInfo, &'static str>{
-        if volume > 1.0 {
-            return Err("Valeur de volume impossible");
-        }
-
-        self.volume = volume;
-        self.muted = muted;
-
-        Ok(self)
-    }
 }
 
 

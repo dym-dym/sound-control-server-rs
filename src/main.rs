@@ -22,7 +22,7 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("/api")
                     .route("/update_volume", web::post().to(api_handlers::update_volume))
-                    .route("/request_infos", web::post().to(api_handlers::request_infos))
+                    .route("/request_infos", web::get().to(api_handlers::request_infos))
             )
 
     })

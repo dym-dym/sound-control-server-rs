@@ -32,6 +32,10 @@ pub fn update_app_volume(
     let mut device_index = 100000;
     let mut found = false;
 
+    if apps.is_empty() {
+        return Err("No apps running");
+    }
+
     for app in apps {
         if app.name.clone().unwrap() == id {
             device_index = app.index;

@@ -1,17 +1,45 @@
-mod volume;
+mod handlers;
 use actix_web::{web, HttpResponse};
+use handlers::doors::DoorInfo;
+use handlers::lightbulb::LightbulbInfo;
+use handlers::volume::AppVolumeInfo;
+use handlers::windows::WindowInfo;
 use pulsectl::controllers::types::ApplicationInfo;
-use volume::AppVolumeInfo;
 
 pub async fn update_volume(instr: web::Json<AppVolumeInfo>) -> HttpResponse {
-    match volume::update_app_volume(instr.volume, instr.id.clone(), instr.muted) {
+    match handlers::volume::update_app_volume(instr.volume, instr.id.clone(), instr.muted) {
+        Err(x) => HttpResponse::InternalServerError().json(x),
+        Ok(x) => HttpResponse::Ok().json(x),
+    }
+}
+
+pub async fn update_lightbulb(instr: web::Json<LightbulbInfo>) -> HttpResponse {
+    match handlers::lightbulb::update_lightbulb_value(
+        instr.intensity,
+        instr.id.clone(),
+        instr.color,
+    ) {
+        Err(x) => HttpResponse::InternalServerError().json(x),
+        Ok(x) => HttpResponse::Ok().json(x),
+    }
+}
+
+pub async fn update_door(instr: web::Json<DoorInfo>) -> HttpResponse {
+    match handlers::doors::update_door_value(instr.open, instr.id.clone()) {
+        Err(x) => HttpResponse::InternalServerError().json(x),
+        Ok(x) => HttpResponse::Ok().json(x),
+    }
+}
+
+pub async fn update_window(instr: web::Json<WindowInfo>) -> HttpResponse {
+    match handlers::windows::update_window_value(instr.open, instr.id.clone()) {
         Err(x) => HttpResponse::InternalServerError().json(x),
         Ok(x) => HttpResponse::Ok().json(x),
     }
 }
 
 pub async fn request_infos() -> HttpResponse {
-    let infos: Vec<ApplicationInfo> = volume::get_app_infos().unwrap();
+    let infos: Vec<ApplicationInfo> = handlers::volume::get_app_infos().unwrap();
 
     if infos.is_empty() {
         println!("No apps running");
@@ -32,4 +60,16 @@ pub async fn request_infos() -> HttpResponse {
     println!(" app_infos : {:?}", app_infos);
 
     HttpResponse::Ok().json(app_infos)
+}
+
+pub async fn request_doors() -> HttpResponse {
+    HttpResponse::Ok().json(handlers::doors::get_doors_infos().unwrap())
+}
+
+pub async fn request_windows() -> HttpResponse {
+    HttpResponse::Ok().json(handlers::windows::get_windows_infos().unwrap())
+}
+
+pub async fn request_lightbulb() -> HttpResponse {
+    HttpResponse::Ok().json(handlers::lightbulb::get_lightbulb_infos().unwrap())
 }

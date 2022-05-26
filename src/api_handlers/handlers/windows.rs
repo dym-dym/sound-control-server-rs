@@ -16,10 +16,26 @@ impl Clone for WindowInfo {
 }
 
 fn windows_list() -> Vec<WindowInfo> {
-    vec![WindowInfo::default()]
+    vec![
+        WindowInfo {
+            open: false,
+            id: String::from("Fenêtre salon 1"),
+        },
+        WindowInfo {
+            open: false,
+            id: String::from("Fenêtre salon 2"),
+        },
+        WindowInfo {
+            open: true,
+            id: String::from("Fenêtre chambre"),
+        },
+    ]
 }
 
-pub fn update_window_value(_open: bool, _id: String) -> Result<&'static str, &'static str> {
+pub fn update_window_value(open: bool, id: String) -> Result<&'static str, &'static str> {
+
+    println!("{id} maintenant : {open}");
+
     Ok("Window {id} updated")
 }
 

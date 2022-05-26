@@ -15,7 +15,7 @@ pub async fn update_volume(instr: web::Json<AppVolumeInfo>) -> HttpResponse {
 
 pub async fn update_lightbulb(instr: web::Json<LightbulbInfo>) -> HttpResponse {
     match handlers::lightbulb::update_lightbulb_value(
-        instr.intensity,
+        instr.intensity.into(),
         instr.id.clone(),
         instr.color,
     ) {

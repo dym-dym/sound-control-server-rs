@@ -6,12 +6,27 @@ pub struct DoorInfo {
     pub id: String,
 }
 
-pub fn update_door_value(_open: bool, _id: String) -> Result<&'static str, &'static str> {
+pub fn update_door_value(open: bool, id: String) -> Result<&'static str, &'static str> {
+    println!("{id} maintenant : {open}");
+
     Ok("Door {id} updated")
 }
 
 pub fn doors_list() -> Vec<DoorInfo> {
-    vec![DoorInfo::default()]
+    vec![
+        DoorInfo {
+            open: false,
+            id: String::from("Porte d'entrée"),
+        },
+        DoorInfo {
+            open: false,
+            id: String::from("Porte de derrière"),
+        },
+        DoorInfo {
+            open: true,
+            id: String::from("Porte chambre des parents"),
+        },
+    ]
 }
 
 pub fn get_doors_infos() -> Result<Vec<DoorInfo>, &'static str> {
